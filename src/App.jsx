@@ -2,13 +2,26 @@ import { useState } from 'react';
 import { Switch, Route, NavLink } from 'react-router-dom';
 import Movie from './components/Movie.jsx';
 import FavMovie from './components/FavMovie.jsx';
+import { useDispatch, useSelector } from 'react-redux';
+import { addFavs, nextMovie, prevMovie } from './store/actions/index.js';
 
 function App() {
-  const [sira, setSira] = useState(0);
-  const favMovies = [];
+  const movies = useSelector((store) => store.movies);
+  const sira = useSelector((store) => store.sira);
+  const favMovies = useSelector((store) => store.favMovies);
+
+  const dispatch = useDispatch();
 
   function sonrakiFilm() {
-    setSira(sira + 1);
+    dispatch(nextMovie());
+  }
+
+  function oncekiFilm() {
+    dispatch(prevMovie());
+  }
+
+  function favorilereEkle() {
+    dispatch(addFavs());
   }
 
   return (
@@ -32,20 +45,40 @@ function App() {
       </nav>
       <Switch>
         <Route exact path="/">
-          <Movie sira={sira} />
+          {movies.length === 0 ? (
+            <div className="text-center">Eklenecek yeni film bulunamadı...</div>
+          ) : (
+            <>
+              <Movie sira={sira} />
 
-          <div className="flex gap-3 justify-end py-3">
-            <button
-              onClick={sonrakiFilm}
-              className="select-none px-4 py-2 border border-blue-700 text-blue-700 hover:border-blue-500 hover:text-blue-500"
-            >
-              Sıradaki
-            </button>
+              <div className="flex gap-3 justify-end py-3">
+                {sira > 0 && (
+                  <button
+                    onClick={oncekiFilm}
+                    className="select-none px-4 py-2 border border-blue-700 text-blue-700 hover:border-blue-500 hover:text-blue-500"
+                  >
+                    Önceki
+                  </button>
+                )}
 
-            <button className="select-none px-4 py-2 bg-blue-700 hover:bg-blue-600 text-white">
-              Listeme ekle
-            </button>
-          </div>
+                {sira < movies.length - 1 && (
+                  <button
+                    onClick={sonrakiFilm}
+                    className="select-none px-4 py-2 border border-blue-700 text-blue-700 hover:border-blue-500 hover:text-blue-500"
+                  >
+                    Sıradaki
+                  </button>
+                )}
+
+                <button
+                  onClick={favorilereEkle}
+                  className="select-none px-4 py-2 bg-blue-700 hover:bg-blue-600 text-white"
+                >
+                  Listeme ekle
+                </button>
+              </div>
+            </>
+          )}
         </Route>
 
         <Route path="/listem">
